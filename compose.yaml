@@ -1,0 +1,45 @@
+services:
+  mjlab-dev:
+    image: ghcr.io/mujocolab/mjlab:latest
+    container_name: mjlab-dev
+
+    gpus: all
+    ipc: host
+
+    ports:
+      - "8080:8080"
+
+    volumes:
+      # 本地项目源码
+      - .:/workspace/mjlab
+
+      # Python 虚拟环境
+      - mjlab-venv:/workspace/mjlab/.venv
+
+      # uv 下载缓存
+      - mjlab-uv-cache:/root/.cache/uv
+
+      # Warp GPU kernel 编译缓存
+      - mjlab-warp-cache:/root/.cache/warp
+
+      # 训练输出，实际上已经包含在源码挂载中，
+      # 这里单独写出来是为了明确训练数据要持久化
+      - ./logs:/workspace/mjlab/logs
+
+    working_dir: /workspace/mjlab
+
+    environment:
+      MUJOCO_GL: egl
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility,graphics
+
+    stdin_open: true
+    tty: true
+
+    entrypoint: /bin/bash
+    command: []
+
+volumes:
+  mjlab-venv:
+  mjlab-uv-cache:
+  mjlab-warp-cache:
